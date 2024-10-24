@@ -1,36 +1,43 @@
-# Uses user input for certain folder to be able to copy all files of a given type to specified destination folder
+# Uses user input for certain folder to be able to copy all files of a given type to a specified destination folder
 
 # User input variables
 $OriginalFolder = Read-Host -Prompt "Enter the folder path to copy from (ex: C:\Test)"
-$FileType = Read-Host -Prompt "Now, provide the file type you want to copy from original folder. For example, if it's a document (*.docx), type docx. Go ahead"
 $DestinationFolder = Read-Host -Prompt "Enter the folder path to copy files to (ex: C:\Test)"
-# ISSUE-INCOMPLETE -> DO LATER 
-# $CopyCutChoice = Read-Host -Prompt "Enter Cut to cut files, or enter/any other key to continue. Type e to exit."
+$FileType = Read-Host -Prompt "Please provide the file type you want to copy from the original folder. For example, if it's a document (*.docx), type 'docx'. Go ahead"
 
-# Prevents logic errors by trimming backslash at end if existent
-if($OriginalFolder.EndsWith("\")) {
+# ISSUE-INCOMPLETE -> DO LATER      # $CopyCutChoice = Read-Host -Prompt "Enter Cut to cut files, or enter/any other key to continue. Type e to exit."
+
+# Prevent logic errors by trimming backslashes at the end if existent
+if ($OriginalFolder.EndsWith("\")) {
     $OriginalFolder = $OriginalFolder.TrimEnd("\")
 }
+if ($DestinationFolder.EndsWith("\")) {
+    $DestinationFolder = $DestinationFolder.TrimEnd("\")
+}
 
-if ((Test-Path "$OriginalFolder") -and (Test-Path "$DestinationFolder")) {
-    $allFiles = Get-ChildItem -Path "($OriginalFolder\*.$FileType)"
+# Check if paths exist
+if ((Test-Path $OriginalFolder) -and (Test-Path $DestinationFolder)) {
+    # Get all files of the specified type from the original folder
+    $allFiles = Get-ChildItem -Path "$OriginalFolder" -Filter "*.$FileType" -File -Recurse -ErrorAction SilentlyContinue
 
-    Write-Host "TESTING: OG Folder: $OriginalFolder ; Destination: $DestinationFolder" # This test shows the correct file location. However, something weird is going on with each file path, and it might need the double "\\"
-
-    foreach($file in $allFiles)
-    {
-        $file = $file.Name
-
-        # Issue: find file's location
-        Copy-Item -Path "$OriginalFolder\$file" -Destination "$DestinationFolder\$file"
+    if ($allFiles.Count -gt 0) {
+        # Copy each file to the destination folder
+        foreach ($file in $allFiles) {
+            $destinationPath = Join-Path -Path $DestinationFolder -ChildPath $file.Name
+            Copy-Item -Path $file.FullName -Destination $destinationPath -Force
+            Write-Host "Copied: $($file.FullName) to $destinationPath"
+        }
+            Write-Host "Successfully copied $($allFiles.Count) '*.$FileType' files to '$DestinationFolder'."
+    }
+    else {
+        Write-Host "No files of type '*.$FileType' were found in '$OriginalFolder'."
     }
 }
-elseif ((Test-Path "$OriginalFolder") -and -not(Test-Path "$DestinationFolder")) {
-    throw "The path $DestinationFolder does NOT exist. Please try again."
-}
-elseif (-not(Test-Path "$OriginalFolder") -and (Test-Path "$DestinationFolder")) {
-    throw "The path $OriginalFolder does NOT exist. Please try again."
-}
 else {
-    throw "The paths $DestinationFolder AND $OriginalFolder do NOT exist. Please try again."
+    if (-not (Test-Path $OriginalFolder)) {
+        throw "The path '$OriginalFolder' does NOT exist. Please try again."
+    }
+    if (-not (Test-Path $DestinationFolder)) {
+        throw "The path '$DestinationFolder' does NOT exist. Please try again."
+    }
 }
