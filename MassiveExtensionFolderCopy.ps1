@@ -42,6 +42,10 @@ if ((Test-Path -LiteralPath $OriginalFolder) -and (Test-Path -LiteralPath $Desti
 
             # Tries to move/copy items over
             try {
+                # Calculate+round percentage complete and shows progress bar
+                $percentComplete = [math]::Round(($i + 1) / $allFiles.Count * 100)
+                Write-Progress -Activity "$MovingOrCopying Files" -Status "$($file.Name)); $percentComplete% Complete" -PercentComplete $percentComplete
+
                 & $MoveOrCopyCommand -LiteralPath $file.FullName -Destination $destinationPath -Force
                 # Write-Host "$MovingOrCopying: $($file.Name) to $destinationPath" -ForegroundColor Green
             }
@@ -50,11 +54,6 @@ if ((Test-Path -LiteralPath $OriginalFolder) -and (Test-Path -LiteralPath $Desti
                 Write-Host "Error message: $_" -ForegroundColor Red
                 $transitionedAllFilesSuccessfully = $false
             }
-
-            # Calculate+round percentage complete and shows progress bar
-            $percentComplete = [math]::Round(($i + 1) / $allFiles.Count * 100)
-            Write-Progress -Activity "$MovingOrCopying Files" -Status "$($file.Name)); $percentComplete% Complete" -PercentComplete $percentComplete
-
         }
 
         # Checks if all files were successfully moved/copied
