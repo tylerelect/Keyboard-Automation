@@ -18,7 +18,10 @@ $OriginalFolder = Optimize-Path (Read-Host -Prompt "Enter the folder path to $Mo
 $DestinationFolder = Optimize-Path (Read-Host -Prompt "Enter the destination folder path to $MoveOrCopy files to (ex: C:\Destination)")
 $FileType = Read-Host -Prompt "Please provide the file type you want to $MoveOrCopy from the original folder. If it's a screenshot (*.png), type 'docx'. If a screen recording/downloaded video, enter mp4. Go ahead"
 
+# $CopySubdirectoriesOption = Read-Host -Prompt "Copy subdirectories? y/n"
+
 #add subdirectory support for copying subdirectories with certain file types (for onedrive)
+#Duplicate file checker, add support for overwriting and copying with (1) or whatever
 
 # Exits if user had selected
 if($CopyCutChoice.ToLower().Trim() -ne "e") 
